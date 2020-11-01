@@ -38,11 +38,8 @@
                 HttpObj.onreadystatechange = function () {
                     if (HttpObj.readyState === 4) {
                         ret = HttpObj.responseText;
-                        alert(ret);
+                        //alert(ret);
                         validate(uname , hash_psw, ret);
-                       // return ret;
-                        //callBack(ret);
-                        //   alert("data retrieved");
                     }
                 }
                 HttpObj.open("GET", url, true);
@@ -59,33 +56,15 @@
                     var psw_fhir = person.identifier[0].value;
 
                     if(uname == uname_fhir && hash_psw == psw_fhir) {
-                        alert('yes');
-                        window.location.replace("http://www.w3schools.com");
+                        alert('login success!');
+                    }
+                    else {
+                        alert("Incorrect username / password. Please try again or register.");
                     }
                 }
-            }
-
-            function createJSON(name, uname, hash_psw) {
-                var person = {
-                    "resourceType": "Person",
-                    "name": [
-                        {
-                            "use": "usual",
-                            "given": [""]
-                        }
-                    ],
-                    "identifier": [
-                        {
-                            "use": "usual",  
-                            "value":""
-                        }
-                    ]
+                else {
+                    alert("Incorrect username / password. Please try again or register.");
                 }
-                
-                person.name[0].given[0] = uname;
-                person.identifier[0].value = hash_psw;
-
-                return JSON.stringify(person);
             }
 
         </script>

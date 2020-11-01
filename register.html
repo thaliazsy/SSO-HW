@@ -15,7 +15,7 @@
                 <label for="psw"><b>Password</b></label><br>
                 <input type="password" placeholder="Enter Password" name="psw" id="psd" required>
                 <br><br>
-                <button type="submit">Login</button>
+                <button type="submit">Register</button>
                 <a href="login.html">Login</a>
               </div>
         </form>
@@ -28,18 +28,41 @@
                 var psw=form.elements["psw"].value;
 
                 var hash_psw = sha256(psw);
+
+                var oneUname = checkUname(uname);
+
                 
+                function myHandler(ret) {
+                    var obj = JSON.parse(ret);
+                        if(obj.total >= 1) {
+                            alert('Register failed! This username is already registered.');
+                        }
+                        else {
+                            var jsonstr = createJSON(name, uname, hash_psw);
+                            var url = "http://hapi.fhir.org/baseR4/Person"
+                            postFHIR(url, jsonstr);
+                            alert('Register success!');
+                        }
+                }
+                checkUname(uname, myHandler);
 
-                var jsonstr = createJSON(name, uname, hash_psw);
-                alert(jsonstr);
-                var url = "http://hapi.fhir.org/baseR4/Person"
-                postFHIR(url, jsonstr);
-
-
-                alert('Form submitted!');
                 return false;
             }
 
+            function checkUname(uname, callback) {
+                var url = "http://hapi.fhir.org/baseR4/Person";
+                url += "?name=" + uname.trim();
+
+                var HttpObj = new XMLHttpRequest();   
+                HttpObj.onreadystatechange = function () {
+                    if (HttpObj.readyState === 4) {
+                        callback(HttpObj.responseText);
+                    }
+                }
+                HttpObj.open("GET", url, true);
+                HttpObj.send();
+            }
+           
             function createJSON(name, uname, hash_psw) {
                 var person = {
                     "resourceType": "Person",
@@ -70,7 +93,7 @@
                 HttpObj.onreadystatechange = function () {
                     if (HttpObj.readyState === 4) {
                         ret = HttpObj.responseText;
-                        alert(ret);
+                        //alert(ret);
                     }
                 }
                 HttpObj.send(data);
