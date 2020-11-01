@@ -1,0 +1,83 @@
+<html>
+    <head>
+        <script src=hash_sha256.js></script>
+    </head>
+    <body>
+        <h1><b>REGISTER</b></h1>
+        <form onsubmit="return register();">
+            <div class="container">
+                <label for="name"><b>Name</b></label><br>
+                <input type="text" placeholder="Enter Name" name="name" id="name" required>
+                <br><br>
+                <label for="uname"><b>Username</b></label><br>
+                <input type="text" placeholder="Enter Username" name="uname" id="uname" required>
+                <br><br>
+                <label for="psw"><b>Password</b></label><br>
+                <input type="password" placeholder="Enter Password" name="psw" id="psd" required>
+                <br><br>
+                <button type="submit">Login</button>
+              </div>
+        </form>
+        <script>
+           function register() {
+                var form = document.forms[0];
+                var name=form.elements["name"].value;
+                var uname=form.elements["uname"].value;
+                var psw=form.elements["psw"].value;
+
+                var hash_psw = sha256(psw);
+                
+
+                var jsonstr = createJSON(name, uname, hash_psw);
+                alert(jsonstr);
+                var url = "http://hapi.fhir.org/baseR4/Person"
+                postFHIR(url, jsonstr);
+
+
+                alert('Form submitted!');
+                return false;
+            }
+
+            function createJSON(name, uname, hash_psw) {
+                var person = {
+                    "resourceType": "Person",
+                    "name": [
+                        {
+                            "use": "usual",
+                            "given": [""]
+                        }
+                    ],
+                    "identifier": [
+                        {
+                            "use": "usual",  
+                            "value":""
+                        }
+                    ]
+                }
+                
+                person.name[0].given[0] = uname;
+                person.identifier[0].value = hash_psw;
+
+                return JSON.stringify(person);
+            }
+
+            function postFHIR(url, data) {
+                var HttpObj = new XMLHttpRequest();
+                HttpObj.open("POST", url, true);
+                HttpObj.setRequestHeader("Content-type", "application/json+fhir");
+                HttpObj.onreadystatechange = function () {
+                    if (HttpObj.readyState === 4) {
+                        ret = HttpObj.responseText;
+                        alert(ret);
+                    }
+                }
+                HttpObj.send(data);
+            }
+
+            function myFunction(arr) {
+                alert("Post berhasil");
+            }
+        </script>
+    </body>
+
+</html>
