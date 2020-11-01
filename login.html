@@ -1,0 +1,94 @@
+<html>
+    <head>
+        <script src=hash_sha256.js></script>
+    </head>
+    <body>
+        <h1><b>LOGIN</b></h1>
+        <form onsubmit="return login();">
+            <div class="container">
+                <label for="uname"><b>Username</b></label><br>
+                <input type="text" placeholder="Enter Username" name="uname" id="uname" required>
+                <br><br>
+                <label for="psw"><b>Password</b></label><br>
+                <input type="password" placeholder="Enter Password" name="psw" id="psd" required>
+                <br><br>
+                <button type="submit">Login</button>
+                <a href="register.html">Register</a>
+              </div>
+        </form>
+        <script>
+
+           function login() {
+                var form = document.forms[0];
+                var uname=form.elements["uname"].value;
+                var psw=form.elements["psw"].value;
+
+                var hash_psw = sha256(psw);
+
+                var url = "http://hapi.fhir.org/baseR4/Person";
+                url += "?name=" + uname.trim();
+
+                getFHIR(url, uname, hash_psw);
+
+                return false;
+            }
+
+            function getFHIR(url, uname, hash_psw) {
+                var HttpObj = new XMLHttpRequest();   
+                HttpObj.onreadystatechange = function () {
+                    if (HttpObj.readyState === 4) {
+                        ret = HttpObj.responseText;
+                        alert(ret);
+                        validate(uname , hash_psw, ret);
+                       // return ret;
+                        //callBack(ret);
+                        //   alert("data retrieved");
+                    }
+                }
+                HttpObj.open("GET", url, true);
+                HttpObj.send();
+            }
+
+            function validate(uname, hash_psw, jsonStr) {
+                var obj = JSON.parse(jsonStr);
+                if(obj.total == 1) {
+
+                    var person = obj.entry[0].resource;
+                    
+                    var uname_fhir = person.name[0].given[0];
+                    var psw_fhir = person.identifier[0].value;
+
+                    if(uname == uname_fhir && hash_psw == psw_fhir) {
+                        alert('yes');
+                        window.location.replace("http://www.w3schools.com");
+                    }
+                }
+            }
+
+            function createJSON(name, uname, hash_psw) {
+                var person = {
+                    "resourceType": "Person",
+                    "name": [
+                        {
+                            "use": "usual",
+                            "given": [""]
+                        }
+                    ],
+                    "identifier": [
+                        {
+                            "use": "usual",  
+                            "value":""
+                        }
+                    ]
+                }
+                
+                person.name[0].given[0] = uname;
+                person.identifier[0].value = hash_psw;
+
+                return JSON.stringify(person);
+            }
+
+        </script>
+    </body>
+
+</html>
